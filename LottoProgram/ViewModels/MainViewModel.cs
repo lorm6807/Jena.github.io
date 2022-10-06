@@ -231,6 +231,7 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
+
                             if (stopwatch.ElapsedMilliseconds > 4000)
                                 step = TimerStop.Num3;
                             break;
@@ -242,6 +243,7 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
+
                             if (stopwatch.ElapsedMilliseconds > 5000)
                                 step = TimerStop.Num4;
                             break;
@@ -253,6 +255,7 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
+
                             if (stopwatch.ElapsedMilliseconds > 6000)
                                 step = TimerStop.Num5;
                             break;
@@ -264,6 +267,7 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = predictModels.Num5;
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
+
                             if (stopwatch.ElapsedMilliseconds > 7000)
                                 step = TimerStop.Num6;
                             break;
@@ -275,6 +279,7 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = predictModels.Num5;
                             lottoModel.Num6 = predictModels.Num6;
                             lottoModel.BonusNum = random.Next(1, 46);
+
                             if (stopwatch.ElapsedMilliseconds > 8000)
                                 step = TimerStop.Bonus;
                             break;

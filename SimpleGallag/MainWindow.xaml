@@ -5,8 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleGallag"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow">
+    <DockPanel>
+        <StackPanel Orientation="Horizontal"
+                    DockPanel.Dock="Top">
+            <UniformGrid Columns="3">
+                <Button Content="Start"
+                        Command="{Binding StartCommand}"/>
+                <Button Content="Pause"
+                        Command="{Binding PauseCommand}"/>
+                <Button Content="Stop"
+                        Command="{Binding StopCommand}"/>
+            </UniformGrid>
+            <TextBlock Text="Score : "/>
+            <TextBlock Text="{Binding Score}"/>
+        </StackPanel>
+        <Canvas>
+            
+        </Canvas>
+    </DockPanel>
 </Window>
