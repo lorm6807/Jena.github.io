@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LottoProgram"
+        xmlns:converters="clr-namespace:LottoProgram.Converters"
         xmlns:vm="clr-namespace:LottoProgram.ViewModels"
         mc:Ignorable="d">
     <Window.DataContext>
@@ -12,8 +13,11 @@
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="TextAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="100"/>
+            <Setter Property="FontSize" Value="50"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+        
+        <converters:NumFromBrushConverter x:Key="NumFromBrushConverter"/>
     </Window.Resources>
     <DockPanel>
         <StackPanel DockPanel.Dock="Top">
@@ -28,16 +32,60 @@
         </StackPanel>
         <DataGrid ItemsSource="{Binding LottoModels}"/>
         <StackPanel DockPanel.Dock="Right">
-            <UniformGrid Columns="7">
-                <TextBlock Text="{Binding LottoModel.Num1,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.Num2,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.Num3,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.Num4,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.Num5,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.Num6,UpdateSourceTrigger=PropertyChanged}"/>
-                <TextBlock Text="{Binding LottoModel.BonusNum,UpdateSourceTrigger=PropertyChanged}"/>
+            <UniformGrid Columns="8">
+                <UniformGrid.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="CornerRadius" Value="100"/>
+                        <Setter Property="Height" Value="100"/>
+                        <Setter Property="Margin" Value="5"/>
+                    </Style>
+                </UniformGrid.Resources>
+                <Border Background="{Binding LottoModel.Num1,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num1,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <Border Background="{Binding LottoModel.Num2,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num2,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <Border Background="{Binding LottoModel.Num3,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num3,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <Border Background="{Binding LottoModel.Num4,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num4,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <Border Background="{Binding LottoModel.Num5,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num5,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <Border Background="{Binding LottoModel.Num6,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.Num6,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
+                <TextBlock Text="+"
+                           VerticalAlignment="Center"
+                           FontSize="100"/>
+                <Border Background="{Binding LottoModel.BonusNum,Converter={StaticResource NumFromBrushConverter}}">
+                    <TextBlock Text="{Binding LottoModel.BonusNum,UpdateSourceTrigger=PropertyChanged}"/>
+                </Border>
             </UniformGrid>
-            <DataGrid ItemsSource="{Binding PredictionModels,UpdateSourceTrigger=PropertyChanged}"/>
+            <DataGrid ItemsSource="{Binding PredictionModels}"
+                      AutoGenerateColumns="False"
+                      BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="당첨번호 1"
+                                        Binding="{Binding Num1}"/>
+                    <DataGridTextColumn Header="당첨번호 2"
+                                        Binding="{Binding Num2}"/>
+                    <DataGridTextColumn Header="당첨번호 3"
+                                        Binding="{Binding Num3}"/>
+                    <DataGridTextColumn Header="당첨번호 4"
+                                        Binding="{Binding Num4}"/>
+                    <DataGridTextColumn Header="당첨번호 5"
+                                        Binding="{Binding Num5}"/>
+                    <DataGridTextColumn Header="당첨번호 6"
+                                        Binding="{Binding Num6}"/>
+                    <DataGridTextColumn Header="보너스 번호"
+                                        Binding="{Binding BonusNum}"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </StackPanel>
     </DockPanel>
 </Window>

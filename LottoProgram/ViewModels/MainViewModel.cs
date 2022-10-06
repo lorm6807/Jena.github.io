@@ -113,7 +113,7 @@ namespace LottoProgram.ViewModels
                 model.Num5 = Convert.ToInt32(jObject["drwtNo5"].ToString());
                 model.Num6 = Convert.ToInt32(jObject["drwtNo6"].ToString());
                 model.BonusNum = Convert.ToInt32(jObject["bnusNo"].ToString());
-                model.Amount = jObject["totSellamnt"].ToString();
+                model.Amount = string.Format("{0:#,0 won}", Convert.ToDouble(jObject["totSellamnt"].ToString()));
 
                 modelList.Add(model);
             };
@@ -176,12 +176,9 @@ namespace LottoProgram.ViewModels
             Bonus,
         }
 
-        private void PredictAction()
+        private async void PredictAction()
         {
-            if (predictTask != null)
-                return;
-
-            if (LottoModels == null)
+            if (predictTask != null && LottoModels == null)
                 return;
 
             var predictModels = PredictAlgorithm.WeightCalculate(LottoModels);
@@ -191,10 +188,8 @@ namespace LottoProgram.ViewModels
             bool isStart = true;
 
             Stopwatch stopwatch = new Stopwatch();
-            Random random = new Random();
+            Random random = new Random(DateTime.Now.Millisecond);
             stopwatch.Start();
-
-            DispatcherTimer timer = new DispatcherTimer();
 
             predictTask = Task.Factory.StartNew(() =>
             {
@@ -205,8 +200,6 @@ namespace LottoProgram.ViewModels
                     switch (step)
                     {
                         case TimerStop.None:
-                            if (stopwatch.ElapsedMilliseconds > 3000)
-                                step = TimerStop.Num1;
                             lottoModel.Num1 = random.Next(1, 46);
                             lottoModel.Num2 = random.Next(1, 46);
                             lottoModel.Num3 = random.Next(1, 46);
@@ -214,6 +207,9 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
+
+                            if (stopwatch.ElapsedMilliseconds > 2000)
+                                step = TimerStop.Num1;
                             break;
                         case TimerStop.Num1:
                             lottoModel.Num1 = predictModels.Num1;
@@ -223,7 +219,9 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Num2;
+
+                            if (stopwatch.ElapsedMilliseconds > 3000)
+                                step = TimerStop.Num2;
                             break;
                         case TimerStop.Num2:
                             lottoModel.Num1 = predictModels.Num1;
@@ -233,7 +231,8 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Num3;
+                            if (stopwatch.ElapsedMilliseconds > 4000)
+                                step = TimerStop.Num3;
                             break;
                         case TimerStop.Num3:
                             lottoModel.Num1 = predictModels.Num1;
@@ -243,7 +242,8 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Num4;
+                            if (stopwatch.ElapsedMilliseconds > 5000)
+                                step = TimerStop.Num4;
                             break;
                         case TimerStop.Num4:
                             lottoModel.Num1 = predictModels.Num1;
@@ -253,7 +253,8 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = random.Next(1, 46);
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Num5;
+                            if (stopwatch.ElapsedMilliseconds > 6000)
+                                step = TimerStop.Num5;
                             break;
                         case TimerStop.Num5:
                             lottoModel.Num1 = predictModels.Num1;
@@ -263,7 +264,8 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = predictModels.Num5;
                             lottoModel.Num6 = random.Next(1, 46);
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Num6;
+                            if (stopwatch.ElapsedMilliseconds > 7000)
+                                step = TimerStop.Num6;
                             break;
                         case TimerStop.Num6:
                             lottoModel.Num1 = predictModels.Num1;
@@ -273,7 +275,8 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = predictModels.Num5;
                             lottoModel.Num6 = predictModels.Num6;
                             lottoModel.BonusNum = random.Next(1, 46);
-                            step = TimerStop.Bonus;
+                            if (stopwatch.ElapsedMilliseconds > 8000)
+                                step = TimerStop.Bonus;
                             break;
                         case TimerStop.Bonus:
                             lottoModel.Num1 = predictModels.Num1;
@@ -283,18 +286,17 @@ namespace LottoProgram.ViewModels
                             lottoModel.Num5 = predictModels.Num5;
                             lottoModel.Num6 = predictModels.Num6;
                             lottoModel.BonusNum = predictModels.BonusNum;
-
                             isStart = false;
                             break;
                     }
 
+                    //Console.WriteLine($"{step}");
                     LottoModel = lottoModel;
                 }
-
-                PredictionModels.Add(lottoModel);
             });
 
-            predictTask = null;
+            await predictTask;
+            PredictionModels.Add(LottoModel);
         }
 
         private ObservableCollection<LottoModel> predictionModels = new ObservableCollection<LottoModel>();

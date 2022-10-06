@@ -87,6 +87,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\NumFromBrushConverter.cs" />
     <Compile Include="Handlers\DataExportHandler.cs" />
     <Compile Include="Handlers\TaskHandler.cs" />
     <Compile Include="Interfaces\ObservableValue.cs" />

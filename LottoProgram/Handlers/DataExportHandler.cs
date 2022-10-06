@@ -54,6 +54,7 @@ namespace LottoProgram.Handlers
                 newModel.Num5 = Convert.ToInt32(lottoText[6]);
                 newModel.Num6 = Convert.ToInt32(lottoText[7]);
                 newModel.BonusNum = Convert.ToInt32(lottoText[8]);
+                newModel.Amount = lottoText[9];
 
                 lottoModels.Add(newModel);
             }
@@ -75,18 +76,20 @@ namespace LottoProgram.Handlers
                 dt.Columns.Add("당첨번호5", typeof(string));
                 dt.Columns.Add("당첨번호6", typeof(string));
                 dt.Columns.Add("보너스 번호", typeof(string));
+                dt.Columns.Add("당첨 금액", typeof(string));
 
                 foreach (var lottoModel in lottoModels)
                 {
-                    dt.Rows.Add($"{lottoModel.Index}");
-                    dt.Rows.Add($"{lottoModel.DateTime}");
-                    dt.Rows.Add($"{lottoModel.Num1}");
-                    dt.Rows.Add($"{lottoModel.Num2}");
-                    dt.Rows.Add($"{lottoModel.Num3}");
-                    dt.Rows.Add($"{lottoModel.Num4}");
-                    dt.Rows.Add($"{lottoModel.Num5}");
-                    dt.Rows.Add($"{lottoModel.Num6}");
-                    dt.Rows.Add($"{lottoModel.BonusNum}");
+                    dt.Rows.Add($"{lottoModel.Index}",
+                    $"{lottoModel.DateTime}",
+                    $"{lottoModel.Num1}",
+                    $"{lottoModel.Num2}",
+                    $"{lottoModel.Num3}",
+                    $"{lottoModel.Num4}",
+                    $"{lottoModel.Num5}",
+                    $"{lottoModel.Num6}",
+                    $"{lottoModel.BonusNum}",
+                    $"{lottoModel.Amount}".Replace(",", ""));
                 }
 
                 if (!Directory.Exists(path))

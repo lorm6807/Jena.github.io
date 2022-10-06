@@ -35,7 +35,6 @@ namespace LottoProgram.Models
             newModel.Num6 = num6;
             newModel.BonusNum = bonus;
 
-
             return newModel;
         }
 

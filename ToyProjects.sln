@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.32802.440
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LottoProgram", "LottoProgram\LottoProgram.csproj", "{AB4FAC43-54C6-4D54-8EF3-EE6194E59972}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleGallag", "SimpleGallag\SimpleGallag.csproj", "{AAB8749E-9892-4FE2-A601-BFD72C533EEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,14 @@ Global
 		{AB4FAC43-54C6-4D54-8EF3-EE6194E59972}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB4FAC43-54C6-4D54-8EF3-EE6194E59972}.Release|x64.ActiveCfg = Release|x64
 		{AB4FAC43-54C6-4D54-8EF3-EE6194E59972}.Release|x64.Build.0 = Release|x64
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Debug|x64.ActiveCfg = Debug|x64
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Debug|x64.Build.0 = Debug|x64
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Release|x64.ActiveCfg = Release|Any CPU
+		{AAB8749E-9892-4FE2-A601-BFD72C533EEE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
