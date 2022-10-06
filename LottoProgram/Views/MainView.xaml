@@ -1,0 +1,43 @@
+﻿<Window x:Class="LottoProgram.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LottoProgram"
+        xmlns:vm="clr-namespace:LottoProgram.ViewModels"
+        mc:Ignorable="d">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="100"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <Button Command="{Binding DbInquireCommand}"
+                    Content="역대 로또 번호 조회"/>
+            <Button Command="{Binding ExportCommand}"
+                    Content="역대 로또 번호 다운로드"/>
+            <Button Command="{Binding ImportCommand}"
+                    Content="역대 로또 번호 파일 조회"/>
+            <Button Command="{Binding PredictCommnad}"
+                    Content="번호 추출"/>
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding LottoModels}"/>
+        <StackPanel DockPanel.Dock="Right">
+            <UniformGrid Columns="7">
+                <TextBlock Text="{Binding LottoModel.Num1,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.Num2,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.Num3,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.Num4,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.Num5,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.Num6,UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="{Binding LottoModel.BonusNum,UpdateSourceTrigger=PropertyChanged}"/>
+            </UniformGrid>
+            <DataGrid ItemsSource="{Binding PredictionModels,UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+    </DockPanel>
+</Window>
