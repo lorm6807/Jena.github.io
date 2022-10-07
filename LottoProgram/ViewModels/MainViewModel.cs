@@ -1,22 +1,17 @@
-﻿using LottoProgram.Handlers;
-using LottoProgram.Helper;
-using LottoProgram.Interfaces;
+﻿using Common.Interfaces;
+using LottoProgram.Handlers;
 using LottoProgram.Models;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace LottoProgram.ViewModels
 {

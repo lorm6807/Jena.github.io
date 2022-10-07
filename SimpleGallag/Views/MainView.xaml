@@ -1,0 +1,30 @@
+﻿<Window x:Class="SimpleGallag.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleGallag"
+        mc:Ignorable="d"
+        Title="Gallag">
+    <DockPanel>
+        <StackPanel Orientation="Horizontal"
+                    DockPanel.Dock="Top">
+            <UniformGrid Columns="3">
+                <Button Content="Start"
+                        Command="{Binding StartCommand}"
+                        Margin="1"/>
+                <Button Content="Pause"
+                        Command="{Binding PauseCommand}"
+                        Margin="1"/>
+                <Button Content="Stop"
+                        Command="{Binding StopCommand}"
+                        Margin="1"/>
+            </UniformGrid>
+            <TextBlock Text="Score : "/>
+            <TextBlock Text="{Binding Score}"/>
+        </StackPanel>
+        <UniformGrid Columns="10">
+            <Rectangle Fill="{Binding }"
+        </UniformGrid>
+    </DockPanel>
+</Window>

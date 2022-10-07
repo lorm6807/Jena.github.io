@@ -103,9 +103,6 @@
     <Compile Include="Converters\NumFromBrushConverter.cs" />
     <Compile Include="Handlers\DataExportHandler.cs" />
     <Compile Include="Handlers\TaskHandler.cs" />
-    <Compile Include="Interfaces\ObservableValue.cs" />
-    <Compile Include="Interfaces\RelayCommand.cs" />
-    <Compile Include="Interfaces\ViewModelBase.cs" />
     <Compile Include="Models\PredictAlgorithm.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="Views\MainView.xaml">
@@ -149,6 +146,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{4e26bba5-79ec-4f88-9395-439c58e70312}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
