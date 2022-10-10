@@ -23,8 +23,5 @@
             <TextBlock Text="Score : "/>
             <TextBlock Text="{Binding Score}"/>
         </StackPanel>
-        <UniformGrid Columns="10">
-            <Rectangle Fill="{Binding }"
-        </UniformGrid>
     </DockPanel>
 </Window>

@@ -43,8 +43,6 @@ namespace SimpleGallag
 
         public static string ConfigName { get; set; } = string.Format("{0}.Json", typeof(SystemConfig).Name);
 
-        public 
-
         public static void Save()
         {
             //string data = Json.Stringify(_instance);
