@@ -13,6 +13,8 @@
                     Gesture="Left"/>
         <KeyBinding Command="{Binding RightDownCommand}"
                     Gesture="Right"/>
+        <KeyBinding Command="{Binding SpaceDownCommand}"
+                    Gesture="Space"/>
     </Window.InputBindings>
     <Window.DataContext>
         <vm:MainViewModel/>

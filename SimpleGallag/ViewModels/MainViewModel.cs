@@ -54,5 +54,13 @@ namespace SimpleGallag.ViewModels
             if (tankPosition < ColumnCount - 1)
                 TankPosition = tankPosition + 1;
         }
+
+        private ICommand spaceDownCommand;
+        public ICommand SpaceDownCommand => spaceDownCommand ?? (spaceDownCommand = new RelayCommand(SpaceDownAction));
+        public void SpaceDownAction()
+        {
+            //if (!isGaming)
+            //    return;
+        }
     }
 }
