@@ -4,8 +4,22 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleGallag"
+        xmlns:vm="clr-namespace:SimpleGallag.ViewModels"
+        xmlns:converter="clr-namespace:SimpleGallag.Converters"
         mc:Ignorable="d"
         Title="Gallag">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding LeftDownCommand}"
+                    Gesture="Left"/>
+        <KeyBinding Command="{Binding RightDownCommand}"
+                    Gesture="Right"/>
+    </Window.InputBindings>
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <converter:IntToBrushConverter x:Key="IntToBrushConverter"/>
+    </Window.Resources>
     <DockPanel>
         <StackPanel Orientation="Horizontal"
                     DockPanel.Dock="Top">
@@ -23,5 +37,13 @@
             <TextBlock Text="Score : "/>
             <TextBlock Text="{Binding Score}"/>
         </StackPanel>
+        <UniformGrid Columns="{Binding ColumnCount}" DockPanel.Dock="Bottom"
+                     VerticalAlignment="Bottom">
+            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=0}" Height="50"/>
+            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=1}" Height="50"/>
+            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=2}" Height="50"/>
+            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=3}" Height="50"/>
+            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=4}" Height="50"/>
+        </UniformGrid>
     </DockPanel>
 </Window>

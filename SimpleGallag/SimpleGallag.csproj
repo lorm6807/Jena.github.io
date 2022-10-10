@@ -99,6 +99,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\IntToBrushConverter.cs" />
     <Compile Include="Models\Array2D.cs" />
     <Compile Include="SystemConfig.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -140,8 +141,6 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
