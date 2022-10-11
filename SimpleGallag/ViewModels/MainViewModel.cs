@@ -59,6 +59,7 @@ namespace SimpleGallag.ViewModels
         public ICommand SpaceDownCommand => spaceDownCommand ?? (spaceDownCommand = new RelayCommand(SpaceDownAction));
         public void SpaceDownAction()
         {
+            // TODO : [Jena] 해당 포지션에 있는 Thread의 트리거를 셋한다..?
             //if (!isGaming)
             //    return;
         }

@@ -101,6 +101,7 @@
     </Compile>
     <Compile Include="Converters\IntToBrushConverter.cs" />
     <Compile Include="Models\Array2D.cs" />
+    <Compile Include="Models\RockDropThread.cs" />
     <Compile Include="SystemConfig.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">

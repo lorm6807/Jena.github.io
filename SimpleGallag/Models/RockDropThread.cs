@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SimpleGallag.Models
 {
-    public class Array2D
+    public class RockDropThread
     {
     }
 }
