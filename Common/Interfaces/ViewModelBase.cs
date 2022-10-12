@@ -18,12 +18,12 @@ namespace Common.Interfaces
                 return false;
 
             storage = value;
-            OnPropertyChagned(propertyName);
+            OnPropertyChanged(propertyName);
 
             return true;
         }
 
-        private void OnPropertyChagned(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

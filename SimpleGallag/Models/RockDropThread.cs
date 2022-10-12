@@ -8,5 +8,10 @@ namespace SimpleGallag.Models
 {
     public class RockDropThread
     {
+        public static int DropTimer { get; set; }
+        public RockDropThread()
+        {
+
+        }
     }
 }
