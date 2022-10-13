@@ -49,14 +49,18 @@
                         Command="{Binding StopCommand}"
                         Margin="1"/>
             </UniformGrid>
-            <TextBlock Text="Score : "/>
-            <TextBlock Text="{Binding Score}"/>
+            <TextBlock Text="Score : "
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"/>
+            <TextBlock Text="{Binding Score,UpdateSourceTrigger=PropertyChanged}"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"/>
         </StackPanel>
         <Border BorderBrush="Black"
                 BorderThickness="1">
             <Canvas Width="{Binding CanvasWidth}"
                     Height="{Binding CanvasHeight}"
-                    Background="FloralWhite">
+                    Background="GhostWhite">
                 <ItemsControl ItemsSource="{Binding RockItems}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

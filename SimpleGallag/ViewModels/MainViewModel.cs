@@ -39,6 +39,7 @@ namespace SimpleGallag.ViewModels
             Tank = tank;
 
             BindingOperations.EnableCollectionSynchronization(RockItems, RockItems);
+            BindingOperations.EnableCollectionSynchronization(SpeedRockItems, SpeedRockItems);
         }
 
         private int canvasWidth = 700;
@@ -99,6 +100,7 @@ namespace SimpleGallag.ViewModels
 
         //일단 바인딩 암케나 걸어보자..
         public ObservableCollection<Rock> RockItems { get; } = new ObservableCollection<Rock>();
+        public ObservableCollection<Rock> SpeedRockItems { get; } = new ObservableCollection<Rock>();
 
         private ICommand startCommand;
         public ICommand StartCommand => startCommand ?? (startCommand = new RelayCommand(StartAction));
@@ -107,6 +109,7 @@ namespace SimpleGallag.ViewModels
         {
             IsGaming = true;
             RockItems.Clear();
+            SpeedRockItems.Clear();
             // 쓰레드를 만들어
             // 몇개를 만드냐면..
             // 캔버스를 기준으로 컬럼 개수로 나눈거..
@@ -114,6 +117,12 @@ namespace SimpleGallag.ViewModels
             var xInterval = CanvasWidth / ColumnCount;
             var yInterval = CanvasHeight / (RowCount + 1);
 
+            var xList = new List<int>();
+            for (int i = 0; i < ColumnCount; i++)
+                xList.Add(i * xInterval);
+
+            var random = new Random(DateTime.Now.Millisecond);
+            int index = 0;
             Task.Factory.StartNew(() =>
             {
                 while (IsGaming)
@@ -121,14 +130,17 @@ namespace SimpleGallag.ViewModels
                     lock (RockItems)
                     {
                         var rock = new Rock();
+                        index = random.Next(xList.Count);
+                        rock.X = xList[index];
                         rock.Y = 0;
+
                         RockItems.Add(rock);
 
                         foreach (var item in RockItems)
                         {
-                            item.X = 0;
                             if (rock != item)
                                 item.Y += yInterval;
+
                             item.Width = xInterval;
                             item.Height = yInterval;
                             item.Brush = Brushes.Black;
@@ -149,13 +161,15 @@ namespace SimpleGallag.ViewModels
                     {
                         foreach (var item in RockItems)
                         {
-                            if (Tank.Laser.Y != 0 && item.Y >= Tank.Laser.Y)
+                            if (Tank.Laser.Y != 0 && item.Y >= Tank.Laser.Y
+                            && Tank.X == item.X)
                                 removeList.Add(item);
                         }
 
                         foreach (var item in removeList)
                         {
                             RockItems.Remove(item);
+                            Score += item.Score;
                         }
                     }
 
