@@ -12,8 +12,6 @@ namespace SimpleGallag.Models
 
     public class Rock : ViewModelBase
     {
-        public AttackedDelegate OnAttackChanged;
-
         private double height;
         public double Height { get => height; set => Set(ref height, value); }
 
@@ -28,9 +26,6 @@ namespace SimpleGallag.Models
 
         private Brush brush;
         public Brush Brush { get => brush; set => Set(ref brush, value); }
-
-        private bool isAttacked;
-        public bool IsAttacked { get => isAttacked; set => Set(ref isAttacked, value); }
 
         //나중에 색깔같은거 추가해서.. 스피드조정 다르게 하도록..
     }

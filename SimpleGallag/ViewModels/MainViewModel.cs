@@ -3,10 +3,12 @@ using SimpleGallag.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -35,6 +37,8 @@ namespace SimpleGallag.ViewModels
             tank.Height = yInterval;
 
             Tank = tank;
+
+            BindingOperations.EnableCollectionSynchronization(RockItems, RockItems);
         }
 
         private int canvasWidth = 700;
@@ -94,12 +98,7 @@ namespace SimpleGallag.ViewModels
         }
 
         //일단 바인딩 암케나 걸어보자..
-        private ConcurrentQueue<Rock> rockItems;
-        public ConcurrentQueue<Rock> RockItems
-        {
-            get => rockItems;
-            set => Set(ref rockItems, value);
-        }
+        public ObservableCollection<Rock> RockItems { get; } = new ObservableCollection<Rock>();
 
         private ICommand startCommand;
         public ICommand StartCommand => startCommand ?? (startCommand = new RelayCommand(StartAction));
@@ -107,6 +106,7 @@ namespace SimpleGallag.ViewModels
         private void StartAction()
         {
             IsGaming = true;
+            RockItems.Clear();
             // 쓰레드를 만들어
             // 몇개를 만드냐면..
             // 캔버스를 기준으로 컬럼 개수로 나눈거..
@@ -114,31 +114,28 @@ namespace SimpleGallag.ViewModels
             var xInterval = CanvasWidth / ColumnCount;
             var yInterval = CanvasHeight / (RowCount + 1);
 
-            var queue = new ConcurrentQueue<Rock>();
-            var rock = new Rock();
-            rock.OnAttackChanged -= OnAttackChanged;
-            rock.OnAttackChanged += OnAttackChanged;
-            queue.Enqueue(rock);
-
             Task.Factory.StartNew(() =>
             {
                 while (IsGaming)
                 {
-                    while (queue.TryPeek(out Rock result))
+                    lock (RockItems)
                     {
-                        result.X = 0;
-                        result.Width = xInterval;
-                        result.Height = yInterval;
-                        result.Y += yInterval;
-                        result.Brush = Brushes.Black;
+                        var rock = new Rock();
+                        rock.Y = 0;
+                        RockItems.Add(rock);
 
-                        if (result.IsAttacked)
-                            break;
-
-                        RockItems = null;
-                        RockItems = queue;
-                        Thread.Sleep(1000);
+                        foreach (var item in RockItems)
+                        {
+                            item.X = 0;
+                            if (rock != item)
+                                item.Y += yInterval;
+                            item.Width = xInterval;
+                            item.Height = yInterval;
+                            item.Brush = Brushes.Black;
+                        }
                     }
+
+                    Thread.Sleep(1000);
                 }
 
             }, TaskCreationOptions.LongRunning);
@@ -147,21 +144,24 @@ namespace SimpleGallag.ViewModels
             {
                 while (IsGaming)
                 {
-                    if (RockItems != null && RockItems.TryPeek(out Rock result))
+                    var removeList = new List<Rock>();
+                    lock (RockItems)
                     {
-                        if (Tank.Laser.Y != 0 && result.Y >= Tank.Laser.Y)
-                            result.OnAttackChanged.Invoke(result);
+                        foreach (var item in RockItems)
+                        {
+                            if (Tank.Laser.Y != 0 && item.Y >= Tank.Laser.Y)
+                                removeList.Add(item);
+                        }
+
+                        foreach (var item in removeList)
+                        {
+                            RockItems.Remove(item);
+                        }
                     }
+
+                    Thread.Sleep(100);
                 }
             }, TaskCreationOptions.LongRunning);
-        }
-
-        private void OnAttackChanged(Rock rock)
-        {
-            //rock.Brush = Brushes.Red;
-            rock.Brush = Brushes.Transparent;
-            rock.Brush.Freeze();
-            rock.IsAttacked = true;
         }
 
         private ICommand pauseCommand;
@@ -229,6 +229,8 @@ namespace SimpleGallag.ViewModels
             Tank.Laser.Y = rockY;
 
             await Task.Delay(100);
+
+            Tank.Laser.Y = 0;
             Tank.Laser.Height = 0;
 
             //Tank.IsAttack = false;
