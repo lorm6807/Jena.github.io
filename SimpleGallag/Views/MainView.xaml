@@ -40,10 +40,11 @@
                         Focusable="False"
                         Command="{Binding StartCommand}"
                         Margin="1"/>
-                <Button Content="Pause"
-                        Focusable="False"
-                        Command="{Binding PauseCommand}"
-                        Margin="1"/>
+                <ToggleButton Content="Pause"
+                              Focusable="False"
+                              IsChecked="{Binding IsPause}"
+                              Command="{Binding PauseCommand}"
+                              Margin="1"/>
                 <Button Content="Stop"
                         Focusable="False"
                         Command="{Binding StopCommand}"
@@ -61,7 +62,7 @@
             <Canvas Width="{Binding CanvasWidth}"
                     Height="{Binding CanvasHeight}"
                     Background="GhostWhite">
-                <ItemsControl ItemsSource="{Binding RockItems}">
+                <ItemsControl ItemsSource="{Binding BasicRockItems}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas/>

@@ -16,6 +16,13 @@ namespace SimpleGallag.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
+        enum TaskType
+        {
+            StartBasicRockDrop,
+            CheckBasicRockCrush,
+            CheckGameOver,
+        }
+
         private ICommand loadedCommand;
         public ICommand LoadedCommand => loadedCommand ?? (loadedCommand = new RelayCommand(LoadedAction));
 
@@ -38,8 +45,14 @@ namespace SimpleGallag.ViewModels
 
             Tank = tank;
 
-            BindingOperations.EnableCollectionSynchronization(RockItems, RockItems);
+            BindingOperations.EnableCollectionSynchronization(BasicRockItems, BasicRockItems);
             BindingOperations.EnableCollectionSynchronization(SpeedRockItems, SpeedRockItems);
+
+            TaskPauseMap = new Dictionary<TaskType, SemaphoreSlim>();
+
+            TaskPauseMap[TaskType.StartBasicRockDrop] = new SemaphoreSlim(1);
+            TaskPauseMap[TaskType.CheckBasicRockCrush] = new SemaphoreSlim(1);
+            TaskPauseMap[TaskType.CheckGameOver] = new SemaphoreSlim(1);
         }
 
         private int canvasWidth = 700;
@@ -63,6 +76,13 @@ namespace SimpleGallag.ViewModels
             set => Set(ref isGaming, value);
         }
 
+        private bool isPause;
+        public bool IsPause
+        {
+            get => isPause;
+            set => Set(ref isPause, value);
+        }
+
         private int score;
         public int Score
         {
@@ -84,13 +104,6 @@ namespace SimpleGallag.ViewModels
             set => Set(ref rowCount, value);
         }
 
-        //private int tankPosition = 2;
-        //public int TankPosition
-        //{
-        //    get => tankPosition;
-        //    set => Set(ref tankPosition, value);
-        //}
-
         private Tank tank;
         public Tank Tank
         {
@@ -98,22 +111,47 @@ namespace SimpleGallag.ViewModels
             set => Set(ref tank, value);
         }
 
-        //일단 바인딩 암케나 걸어보자..
-        public ObservableCollection<Rock> RockItems { get; } = new ObservableCollection<Rock>();
+        private Dictionary<TaskType, SemaphoreSlim> TaskPauseMap;
+        //private Dictionary<Task, SemaphoreSlim> TaskCompleteMap;
+
+        public ObservableCollection<Rock> BasicRockItems { get; } = new ObservableCollection<Rock>();
         public ObservableCollection<Rock> SpeedRockItems { get; } = new ObservableCollection<Rock>();
 
         private ICommand startCommand;
         public ICommand StartCommand => startCommand ?? (startCommand = new RelayCommand(StartAction));
 
-        private void StartAction()
+        private void CheckCrushTask(TaskType taskType, ObservableCollection<Rock> rocks)
         {
-            IsGaming = true;
-            RockItems.Clear();
-            SpeedRockItems.Clear();
-            // 쓰레드를 만들어
-            // 몇개를 만드냐면..
-            // 캔버스를 기준으로 컬럼 개수로 나눈거..
-            // 캔버스의 영역을 어떻게 가져오지?
+            Task.Factory.StartNew(async () =>
+            {
+                while (IsGaming)
+                {
+                    await TaskPauseMap[taskType].WaitAsync();
+                    TaskPauseMap[taskType].Release();
+
+                    var removeList = new List<Rock>();
+                    lock (rocks)
+                    {
+                        foreach (var item in rocks)
+                        {
+                            if (Tank.Laser.Y != 0 && item.Y >= Tank.Laser.Y && Tank.X == item.X)
+                                removeList.Add(item);
+                        }
+
+                        foreach (var item in removeList)
+                        {
+                            rocks.Remove(item);
+                            Score += item.Score;
+                        }
+                    }
+
+                    Thread.Sleep(100);
+                }
+            }, TaskCreationOptions.LongRunning);
+        }
+
+        private void StartRockDropTask(TaskType taskType, ObservableCollection<Rock> rocks, int sleepTime)
+        {
             var xInterval = CanvasWidth / ColumnCount;
             var yInterval = CanvasHeight / (RowCount + 1);
 
@@ -123,20 +161,24 @@ namespace SimpleGallag.ViewModels
 
             var random = new Random(DateTime.Now.Millisecond);
             int index = 0;
-            Task.Factory.StartNew(() =>
+
+            Task.Factory.StartNew(async () =>
             {
                 while (IsGaming)
                 {
-                    lock (RockItems)
+                    await TaskPauseMap[taskType].WaitAsync();
+                    TaskPauseMap[taskType].Release();
+
+                    lock (rocks)
                     {
                         var rock = new Rock();
                         index = random.Next(xList.Count);
                         rock.X = xList[index];
                         rock.Y = 0;
 
-                        RockItems.Add(rock);
+                        rocks.Add(rock);
 
-                        foreach (var item in RockItems)
+                        foreach (var item in rocks)
                         {
                             if (rock != item)
                                 item.Y += yInterval;
@@ -147,43 +189,39 @@ namespace SimpleGallag.ViewModels
                         }
                     }
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(sleepTime);
                 }
 
             }, TaskCreationOptions.LongRunning);
+        }
 
-            Task.Factory.StartNew(() =>
-            {
-                while (IsGaming)
-                {
-                    var removeList = new List<Rock>();
-                    lock (RockItems)
-                    {
-                        foreach (var item in RockItems)
-                        {
-                            if (Tank.Laser.Y != 0 && item.Y >= Tank.Laser.Y
-                            && Tank.X == item.X)
-                                removeList.Add(item);
-                        }
+        private void StartAction()
+        {
+            IsGaming = true;
+            Score = 0;
 
-                        foreach (var item in removeList)
-                        {
-                            RockItems.Remove(item);
-                            Score += item.Score;
-                        }
-                    }
+            BasicRockItems.Clear();
+            SpeedRockItems.Clear();
 
-                    Thread.Sleep(100);
-                }
-            }, TaskCreationOptions.LongRunning);
+            StartRockDropTask(TaskType.StartBasicRockDrop, BasicRockItems, 1000);
+            CheckCrushTask(TaskType.CheckBasicRockCrush, BasicRockItems);
         }
 
         private ICommand pauseCommand;
         public ICommand PauseCommand => pauseCommand ?? (pauseCommand = new RelayCommand(PauseAction));
 
-        private void PauseAction()
+        private async void PauseAction()
         {
-
+            if (IsPause)
+            {
+                foreach (var pause in TaskPauseMap.Values)
+                    await pause.WaitAsync();
+            }
+            else
+            {
+                foreach (var pause in TaskPauseMap.Values)
+                    pause.Release();
+            }
         }
 
         private ICommand stopCommand;
@@ -192,6 +230,15 @@ namespace SimpleGallag.ViewModels
         private void StopAction()
         {
             IsGaming = false;
+            Score = 0;
+            foreach (var pause in TaskPauseMap.Values)
+            {
+                if (pause.CurrentCount == 0)
+                    pause.Release();
+            }
+
+            BasicRockItems.Clear();
+            SpeedRockItems.Clear();
         }
 
         private ICommand leftDownCommand;
@@ -222,34 +269,26 @@ namespace SimpleGallag.ViewModels
         public ICommand SpaceDownCommand => spaceDownCommand ?? (spaceDownCommand = new RelayCommand(SpaceDownAction));
         public async void SpaceDownAction()
         {
-            // TODO : [Jena] 해당 포지션에 있는 Thread의 트리거를 셋한다..?
-            //if (!isGaming)
-            //    return;
-
-            if (RockItems == null || RockItems.Count == 0)
+            if (BasicRockItems == null || BasicRockItems.Count == 0)
                 return;
 
-            //var laser = new Laser();
-            //Tank.IsAttack = true;
             Tank.Laser.Width = Tank.Width / 10;
 
-            //해당 쓰레드에 있는 Y 찾아가지고 갱신해주기!
-            var rockY = RockItems.FirstOrDefault().Y;
+            var yList = BasicRockItems.Select(rock => rock.Y).ToList();
+            var random = new Random(DateTime.Now.Millisecond);
+            int index = random.Next(yList.Count);
+
+            var rockY = yList[index];
             if (rockY > canvasHeight)
                 rockY = 0;
 
             Tank.Laser.Height = CanvasHeight - rockY;
-            //Tank.Laser.X = Tank.X + Tank.Width / 2;
             Tank.Laser.Y = rockY;
 
             await Task.Delay(100);
 
             Tank.Laser.Y = 0;
             Tank.Laser.Height = 0;
-
-            //Tank.IsAttack = false;
-
-            //OnPropertyChanged("Tank");
         }
     }
 }
