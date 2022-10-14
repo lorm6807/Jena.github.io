@@ -13,6 +13,12 @@
         SizeToContent="WidthAndHeight"
         Title="Gallag">
     <Window.InputBindings>
+        <KeyBinding Command="{Binding StartCommand}"
+                    Gesture="Ctrl+A"/>
+        <KeyBinding Command="{Binding PauseCommand}"
+                    Gesture="Ctrl+S"/>
+        <KeyBinding Command="{Binding StopCommand}"
+                    Gesture="Ctrl+D"/>
         <KeyBinding Command="{Binding LeftDownCommand}"
                     Gesture="Left"/>
         <KeyBinding Command="{Binding RightDownCommand}"
@@ -28,92 +34,166 @@
         <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
     <DockPanel>
-        <i:Interaction.Triggers>
+        <!--<i:Interaction.Triggers>
             <i:EventTrigger EventName="Loaded">
                 <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
             </i:EventTrigger>
-        </i:Interaction.Triggers>
+        </i:Interaction.Triggers>-->
         <StackPanel Orientation="Horizontal"
                     DockPanel.Dock="Top">
             <UniformGrid Columns="3">
                 <Button Content="Start"
                         Focusable="False"
+                        FontSize="15"
+                        FontWeight="Bold"
                         Command="{Binding StartCommand}"
                         Margin="1"/>
                 <ToggleButton Content="Pause"
                               Focusable="False"
+                              FontSize="15"
                               IsChecked="{Binding IsPause}"
+                              IsEnabled="{Binding IsGaming}"
                               Command="{Binding PauseCommand}"
                               Margin="1"/>
                 <Button Content="Stop"
                         Focusable="False"
+                        FontSize="15"
+                        FontWeight="Bold"
                         Command="{Binding StopCommand}"
+                        IsEnabled="{Binding IsGaming}"
                         Margin="1"/>
             </UniformGrid>
             <TextBlock Text="Score : "
+                       FontSize="15"
                        VerticalAlignment="Center"
-                       FontWeight="Bold"/>
+                       FontWeight="Bold"
+                       Margin="1"/>
             <TextBlock Text="{Binding Score,UpdateSourceTrigger=PropertyChanged}"
                        VerticalAlignment="Center"
+                       FontSize="15"
                        FontWeight="Bold"/>
         </StackPanel>
-        <Border BorderBrush="Black"
-                BorderThickness="1">
-            <Canvas Width="{Binding CanvasWidth}"
-                    Height="{Binding CanvasHeight}"
-                    Background="GhostWhite">
-                <ItemsControl ItemsSource="{Binding BasicRockItems}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Rectangle Width="{Binding Width}" 
-                                       Height="{Binding Height}"
-                                       Fill="{Binding Brush}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Rectangle Canvas.Left="{Binding Tank.Laser.X}"
-                           Canvas.Top="{Binding Tank.Laser.Y}"
-                           Width="{Binding Tank.Laser.Width}"
-                           Height="{Binding Tank.Laser.Height}"
-                           Fill="Red"/>
-                <Rectangle Canvas.Left="{Binding Tank.X}"
-                           Canvas.Top="{Binding Tank.Y}"
-                           Width="{Binding Tank.Width}"
-                           Height="{Binding Tank.Height}"
-                           Fill="CadetBlue"/>
-            </Canvas>
-        </Border>
-
-        <!--<UniformGrid Columns="{Binding ColumnCount}" DockPanel.Dock="Bottom"
-                     VerticalAlignment="Bottom">
-            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=0}" Height="50"/>
-            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=1}" Height="50"/>
-            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=2}" Height="50"/>
-            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=3}" Height="50"/>
-            <Rectangle Fill="{Binding TankPosition, Converter={StaticResource IntToBrushConverter},ConverterParameter=4}" Height="50"/>
-        </UniformGrid>
-
-        <UniformGrid Columns="{Binding ColumnCount}"
-                     Rows="{Binding RowCount}">
-        </UniformGrid>-->
-        <!--<UniformGrid DockPanel.Dock="Top"
-                     Columns="{Binding ColumnCount}"
-                     Rows="{Binding RowCount}"
-                     VerticalAlignment="Top">
-            <Rectangle Fill="red" Grid.Column="0" Grid.Row="0"/>
-            <Rectangle Fill="red"/>
-            <Rectangle Fill="red"/>
-        </UniformGrid>-->
+        <Grid>
+            <Border BorderBrush="Black"
+                    BorderThickness="1">
+                <Canvas Width="{Binding CanvasWidth}"
+                        Height="{Binding CanvasHeight}"
+                        Background="GhostWhite">
+                    <ItemsControl ItemsSource="{Binding NormalRockItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="{Binding Width}" 
+                                           Height="{Binding Height}"
+                                           Fill="{Binding Brush}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding HardRockItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="{Binding Width}" 
+                                           Height="{Binding Height}"
+                                           Fill="{Binding Brush}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding MoreHardRockItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="{Binding Width}" 
+                                           Height="{Binding Height}"
+                                           Fill="{Binding Brush}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding BonusRockItems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="{Binding Width}" 
+                                           Height="{Binding Height}"
+                                           Fill="{Binding Brush}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Rectangle Canvas.Left="{Binding Tank.Laser.X}"
+                               Canvas.Top="{Binding Tank.Laser.Y}"
+                               Width="{Binding Tank.Laser.Width}"
+                               Height="{Binding Tank.Laser.Height}"
+                               Fill="Red"/>
+                    <Rectangle Canvas.Left="{Binding Tank.X}"
+                               Canvas.Top="{Binding Tank.Y}"
+                               Width="{Binding Tank.Width}"
+                               Height="{Binding Tank.Height}"
+                               Fill="CadetBlue"/>
+                </Canvas>
+            </Border>
+            <TextBlock Text="Game Over"
+                       Visibility="{Binding IsGameOver, Converter={StaticResource BooleanToVisibilityConverter}}"
+                       Name="Text"
+                       FontSize="100"
+                       FontStyle="Italic"
+                       HorizontalAlignment="Center"
+                       Foreground="Red"
+                       VerticalAlignment="Center">
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="TextBlock.Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="Text"
+                                                 Storyboard.TargetProperty="Opacity"
+                                                 From="1.0" To="0.0"
+                                                 Duration="0:0:0.3"
+                                                 AutoReverse="True"
+                                                 RepeatBehavior="Forever"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+        </Grid>
     </DockPanel>
 </Window>

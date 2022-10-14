@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,18 +19,17 @@ namespace SimpleGallag.ViewModels
     {
         enum TaskType
         {
-            StartBasicRockDrop,
-            CheckBasicRockCrush,
+            StartRockDrop,
+            CheckRockCrush,
             CheckGameOver,
         }
 
-        private ICommand loadedCommand;
-        public ICommand LoadedCommand => loadedCommand ?? (loadedCommand = new RelayCommand(LoadedAction));
-
-        private void LoadedAction()
+        enum LevelType
         {
-            //OnPropertyChanged("CanvasWidth");
-            //OnPropertyChanged("CanvasHeight");
+            Normal,
+            Hard,
+            MoreHard,
+            Bonus,
         }
 
         public MainViewModel()
@@ -45,14 +45,22 @@ namespace SimpleGallag.ViewModels
 
             Tank = tank;
 
-            BindingOperations.EnableCollectionSynchronization(BasicRockItems, BasicRockItems);
-            BindingOperations.EnableCollectionSynchronization(SpeedRockItems, SpeedRockItems);
+            BindingOperations.EnableCollectionSynchronization(NormalRockItems, NormalRockItems);
+            BindingOperations.EnableCollectionSynchronization(HardRockItems, HardRockItems);
+            BindingOperations.EnableCollectionSynchronization(MoreHardRockItems, HardRockItems);
+            BindingOperations.EnableCollectionSynchronization(BonusRockItems, HardRockItems);
 
             TaskPauseMap = new Dictionary<TaskType, SemaphoreSlim>();
 
-            TaskPauseMap[TaskType.StartBasicRockDrop] = new SemaphoreSlim(1);
-            TaskPauseMap[TaskType.CheckBasicRockCrush] = new SemaphoreSlim(1);
+            TaskPauseMap[TaskType.StartRockDrop] = new SemaphoreSlim(1);
+            TaskPauseMap[TaskType.CheckRockCrush] = new SemaphoreSlim(1);
             TaskPauseMap[TaskType.CheckGameOver] = new SemaphoreSlim(1);
+
+            RockMap = new Dictionary<LevelType, ObservableCollection<Rock>>();
+            RockMap.Add(LevelType.Normal, NormalRockItems);
+            RockMap.Add(LevelType.Hard, HardRockItems);
+            RockMap.Add(LevelType.MoreHard, MoreHardRockItems);
+            RockMap.Add(LevelType.Bonus, BonusRockItems);
         }
 
         private int canvasWidth = 700;
@@ -69,11 +77,18 @@ namespace SimpleGallag.ViewModels
             set => Set(ref canvasHeight, value);
         }
 
-        private bool isGaming;
+        private bool isGaming = false;
         public bool IsGaming
         {
             get => isGaming;
             set => Set(ref isGaming, value);
+        }
+
+        private bool isGameOver = false;
+        public bool IsGameOver
+        {
+            get => isGameOver;
+            set => Set(ref isGameOver, value);
         }
 
         private bool isPause;
@@ -112,13 +127,40 @@ namespace SimpleGallag.ViewModels
         }
 
         private Dictionary<TaskType, SemaphoreSlim> TaskPauseMap;
-        //private Dictionary<Task, SemaphoreSlim> TaskCompleteMap;
+        private Dictionary<LevelType, ObservableCollection<Rock>> RockMap;
 
-        public ObservableCollection<Rock> BasicRockItems { get; } = new ObservableCollection<Rock>();
-        public ObservableCollection<Rock> SpeedRockItems { get; } = new ObservableCollection<Rock>();
+        public ObservableCollection<Rock> NormalRockItems { get; } = new ObservableCollection<Rock>();
+        public ObservableCollection<Rock> HardRockItems { get; } = new ObservableCollection<Rock>();
+        public ObservableCollection<Rock> MoreHardRockItems { get; } = new ObservableCollection<Rock>();
+        public ObservableCollection<Rock> BonusRockItems { get; } = new ObservableCollection<Rock>();
 
         private ICommand startCommand;
         public ICommand StartCommand => startCommand ?? (startCommand = new RelayCommand(StartAction));
+
+        private void CheckGameOverTask(TaskType taskType, ObservableCollection<Rock> rocks)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                while (IsGaming)
+                {
+                    await TaskPauseMap[taskType].WaitAsync();
+                    TaskPauseMap[taskType].Release();
+
+                    lock (rocks)
+                    {
+                        foreach (var item in rocks)
+                        {
+                            if (item.Y + item.Height >= CanvasHeight)
+                            {
+                                IsGaming = false;
+                                IsGameOver = true;
+                            }
+                        }
+                    }
+                }
+                Thread.Sleep(100);
+            }, TaskCreationOptions.LongRunning);
+        }
 
         private void CheckCrushTask(TaskType taskType, ObservableCollection<Rock> rocks)
         {
@@ -150,7 +192,7 @@ namespace SimpleGallag.ViewModels
             }, TaskCreationOptions.LongRunning);
         }
 
-        private void StartRockDropTask(TaskType taskType, ObservableCollection<Rock> rocks, int sleepTime)
+        private void StartRockDropTask(TaskType taskType, ObservableCollection<Rock> rocks, LevelType levelType)
         {
             var xInterval = CanvasWidth / ColumnCount;
             var yInterval = CanvasHeight / (RowCount + 1);
@@ -162,21 +204,58 @@ namespace SimpleGallag.ViewModels
             var random = new Random(DateTime.Now.Millisecond);
             int index = 0;
 
+            int sleepTime = 1000;
+            var brush = Brushes.Black;
+            int score = 10;
+            switch (levelType)
+            {
+                case LevelType.Normal:
+                    sleepTime = 1000;
+                    brush = Brushes.Black;
+                    score = 10;
+                    break;
+                case LevelType.Hard:
+                    sleepTime = 700;
+                    brush = Brushes.DarkGray;
+                    score = 20;
+                    break;
+                case LevelType.MoreHard:
+                    sleepTime = 200;
+                    brush = Brushes.DimGray;
+                    score = 30;
+                    break;
+                case LevelType.Bonus:
+                    brush = Brushes.Blue;
+                    sleepTime = 100;
+                    score = 100;
+                    break;
+            }
+
             Task.Factory.StartNew(async () =>
             {
+                Stopwatch sw = new Stopwatch();
+
                 while (IsGaming)
                 {
+                    sw.Start();
+
                     await TaskPauseMap[taskType].WaitAsync();
                     TaskPauseMap[taskType].Release();
 
-                    lock (rocks)
+                    //lock (rocks)
                     {
                         var rock = new Rock();
-                        index = random.Next(xList.Count);
-                        rock.X = xList[index];
-                        rock.Y = 0;
 
-                        rocks.Add(rock);
+                        while (sw.ElapsedMilliseconds > sleepTime * 10)
+                        {
+                            index = random.Next(xList.Count);
+                            rock.X = xList[index];
+                            rock.Score = score;
+                            rock.Y = 0;
+                            rocks.Add(rock);
+
+                            sw.Restart();
+                        }
 
                         foreach (var item in rocks)
                         {
@@ -185,7 +264,7 @@ namespace SimpleGallag.ViewModels
 
                             item.Width = xInterval;
                             item.Height = yInterval;
-                            item.Brush = Brushes.Black;
+                            item.Brush = brush;
                         }
                     }
 
@@ -198,13 +277,18 @@ namespace SimpleGallag.ViewModels
         private void StartAction()
         {
             IsGaming = true;
+            IsGameOver = false;
             Score = 0;
 
-            BasicRockItems.Clear();
-            SpeedRockItems.Clear();
+            foreach (var rock in RockMap.Values)
+                rock.Clear();
 
-            StartRockDropTask(TaskType.StartBasicRockDrop, BasicRockItems, 1000);
-            CheckCrushTask(TaskType.CheckBasicRockCrush, BasicRockItems);
+            Parallel.For(0, RockMap.Count, index =>
+            {
+                StartRockDropTask(TaskType.StartRockDrop, RockMap[(LevelType)index], (LevelType)index);
+                CheckCrushTask(TaskType.CheckRockCrush, RockMap[(LevelType)index]);
+                CheckGameOverTask(TaskType.CheckRockCrush, RockMap[(LevelType)index]);
+            });
         }
 
         private ICommand pauseCommand;
@@ -237,8 +321,8 @@ namespace SimpleGallag.ViewModels
                     pause.Release();
             }
 
-            BasicRockItems.Clear();
-            SpeedRockItems.Clear();
+            NormalRockItems.Clear();
+            HardRockItems.Clear();
         }
 
         private ICommand leftDownCommand;
@@ -249,8 +333,6 @@ namespace SimpleGallag.ViewModels
 
             if (Tank.X > 0)
                 Tank.X -= xInterval;
-
-            //OnPropertyChanged("Tank");
         }
 
         private ICommand rightDownCommand;
@@ -261,20 +343,20 @@ namespace SimpleGallag.ViewModels
 
             if (Tank.X < CanvasWidth - xInterval)
                 Tank.X += xInterval;
-
-            //OnPropertyChanged("Tank");
         }
 
         private ICommand spaceDownCommand;
         public ICommand SpaceDownCommand => spaceDownCommand ?? (spaceDownCommand = new RelayCommand(SpaceDownAction));
+
         public async void SpaceDownAction()
         {
-            if (BasicRockItems == null || BasicRockItems.Count == 0)
-                return;
+            var yInterval = CanvasHeight / (RowCount + 1);
+            var yList = new List<int>();
+            for (int i = 2; i < RowCount; i++)
+                yList.Add(i * yInterval);
 
             Tank.Laser.Width = Tank.Width / 10;
 
-            var yList = BasicRockItems.Select(rock => rock.Y).ToList();
             var random = new Random(DateTime.Now.Millisecond);
             int index = random.Next(yList.Count);
 
