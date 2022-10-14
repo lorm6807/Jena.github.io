@@ -24,12 +24,10 @@ namespace SimpleGallag.Models
         private double y;
         public double Y { get => y; set => Set(ref y, value); }
 
-        private Brush brush;
-        public Brush Brush { get => brush; set => Set(ref brush, value); }
+        private ImageBrush brush;
+        public ImageBrush Brush { get => brush; set => Set(ref brush, value); }
 
         private int score = 10;
         public int Score { get => score; set => Set(ref score, value); }
-
-        //나중에 색깔같은거 추가해서.. 스피드조정 다르게 하도록..
     }
 }

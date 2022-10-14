@@ -23,7 +23,7 @@ namespace SimpleGallag.Models
             {
                 Set(ref x, value);
 
-                Laser.X = x + Width / 2;
+                Laser.X = x + Width / 2 - 3;
             }
         }
 

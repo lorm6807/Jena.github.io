@@ -6,19 +6,21 @@
         xmlns:local="clr-namespace:SimpleGallag"
         xmlns:vm="clr-namespace:SimpleGallag.ViewModels"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:converter="clr-namespace:SimpleGallag.Converters"
         mc:Ignorable="d"
         Width="Auto"
         Height="Auto"
+        x:Name="parentWindow"
         SizeToContent="WidthAndHeight"
-        Title="Gallag">
+        Title="Brick Sprinkler">
     <Window.InputBindings>
         <KeyBinding Command="{Binding StartCommand}"
                     Gesture="Ctrl+A"/>
-        <KeyBinding Command="{Binding PauseCommand}"
-                    Gesture="Ctrl+S"/>
+        <!--<KeyBinding Command="{Binding PauseCommand}"
+                    Gesture="Ctrl+W"/>-->
         <KeyBinding Command="{Binding StopCommand}"
-                    Gesture="Ctrl+D"/>
+                    Gesture="Ctrl+S"/>
         <KeyBinding Command="{Binding LeftDownCommand}"
                     Gesture="Left"/>
         <KeyBinding Command="{Binding RightDownCommand}"
@@ -32,13 +34,15 @@
     <Window.Resources>
         <converter:IntToBrushConverter x:Key="IntToBrushConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converter:BooleanToVisibilityInvertConverter x:Key="BooleanToVisibilityInvertConverter"/>
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}"
+                                   CommandParameter="{Binding ElementName=parentWindow}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
-        <!--<i:Interaction.Triggers>
-            <i:EventTrigger EventName="Loaded">
-                <i:InvokeCommandAction Command="{Binding LoadedCommand}"/>
-            </i:EventTrigger>
-        </i:Interaction.Triggers>-->
         <StackPanel Orientation="Horizontal"
                     DockPanel.Dock="Top">
             <UniformGrid Columns="3">
@@ -63,22 +67,57 @@
                         IsEnabled="{Binding IsGaming}"
                         Margin="1"/>
             </UniformGrid>
+            <Menu DockPanel.Dock="Top"
+                  VerticalAlignment="Center"
+                  FontSize="15"
+                  FontWeight="Bold"
+                  Background="DarkGray"
+                  IsEnabled="{Binding IsGaming, Converter={StaticResource BooleanToVisibilityInvertConverter}}">
+                <MenuItem Header="Option">
+                    <MenuItem Header="Level">
+                        <RadioButton Content="Easy" IsChecked="{Binding IsEasy,UpdateSourceTrigger=PropertyChanged}"/>
+                        <RadioButton Content="Normal" IsChecked="{Binding IsNormal,UpdateSourceTrigger=PropertyChanged}"/>
+                        <RadioButton Content="Hard" IsChecked="{Binding IsHard,UpdateSourceTrigger=PropertyChanged}"/>
+                    </MenuItem>
+                    <MenuItem Header="Colomn">
+                        <mahapps:NumericUpDown Value="{Binding ColumnCount,UpdateSourceTrigger=PropertyChanged}"/>
+                    </MenuItem>
+                    <MenuItem Header="Row">
+                        <mahapps:NumericUpDown Value="{Binding RowCount,UpdateSourceTrigger=PropertyChanged}"/>
+                    </MenuItem>
+                </MenuItem>
+            </Menu>
+        </StackPanel>
+        <UniformGrid Columns="4"
+                     DockPanel.Dock="Top">
             <TextBlock Text="Score : "
-                       FontSize="15"
-                       VerticalAlignment="Center"
-                       FontWeight="Bold"
-                       Margin="1"/>
+                           FontSize="15"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Margin="1"/>
             <TextBlock Text="{Binding Score,UpdateSourceTrigger=PropertyChanged}"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           FontWeight="Bold"/>
+            <TextBlock Text="Level : "
+                           FontSize="15"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Margin="1"/>
+            <TextBlock Text="{Binding LevelType,UpdateSourceTrigger=PropertyChanged}"
                        VerticalAlignment="Center"
                        FontSize="15"
                        FontWeight="Bold"/>
-        </StackPanel>
+        </UniformGrid>
         <Grid>
             <Border BorderBrush="Black"
                     BorderThickness="1">
                 <Canvas Width="{Binding CanvasWidth}"
                         Height="{Binding CanvasHeight}"
-                        Background="GhostWhite">
+                        Background="{Binding SkyImageBrush}"
+                        x:Name="canvas">
                     <ItemsControl ItemsSource="{Binding NormalRockItems}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -95,7 +134,10 @@
                             <DataTemplate>
                                 <Rectangle Width="{Binding Width}" 
                                            Height="{Binding Height}"
-                                           Fill="{Binding Brush}"/>
+                                           Fill="{Binding Brush}"
+                                           Opacity="0.8"
+                                           RadiusX="10"
+                                           RadiusY="10"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -115,7 +157,10 @@
                             <DataTemplate>
                                 <Rectangle Width="{Binding Width}" 
                                            Height="{Binding Height}"
-                                           Fill="{Binding Brush}"/>
+                                           Fill="{Binding Brush}"
+                                           Opacity="0.8"
+                                           RadiusX="10"
+                                           RadiusY="10"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -135,7 +180,10 @@
                             <DataTemplate>
                                 <Rectangle Width="{Binding Width}" 
                                            Height="{Binding Height}"
-                                           Fill="{Binding Brush}"/>
+                                           Fill="{Binding Brush}"
+                                           Opacity="0.8"
+                                           RadiusX="10"
+                                           RadiusY="10"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -155,7 +203,10 @@
                             <DataTemplate>
                                 <Rectangle Width="{Binding Width}" 
                                            Height="{Binding Height}"
-                                           Fill="{Binding Brush}"/>
+                                           Fill="{Binding Brush}"
+                                           Opacity="0.8"
+                                           RadiusX="10"
+                                           RadiusY="10"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -163,12 +214,13 @@
                                Canvas.Top="{Binding Tank.Laser.Y}"
                                Width="{Binding Tank.Laser.Width}"
                                Height="{Binding Tank.Laser.Height}"
-                               Fill="Red"/>
+                               Fill="Yellow"
+                               Opacity="0.8"/>
                     <Rectangle Canvas.Left="{Binding Tank.X}"
                                Canvas.Top="{Binding Tank.Y}"
                                Width="{Binding Tank.Width}"
                                Height="{Binding Tank.Height}"
-                               Fill="CadetBlue"/>
+                               Fill="{Binding TankImageBrush}"/>
                 </Canvas>
             </Border>
             <TextBlock Text="Game Over"
@@ -185,7 +237,7 @@
                             <Storyboard>
                                 <DoubleAnimation Storyboard.TargetName="Text"
                                                  Storyboard.TargetProperty="Opacity"
-                                                 From="1.0" To="0.0"
+                                                 From="0.5" To="0.0"
                                                  Duration="0:0:0.3"
                                                  AutoReverse="True"
                                                  RepeatBehavior="Forever"/>
