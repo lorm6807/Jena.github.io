@@ -1,4 +1,5 @@
 ﻿using Common.Interfaces;
+using SimpleGallag.Handlers;
 using SimpleGallag.Models;
 using SimpleGallag.Views;
 using System;
@@ -28,13 +29,6 @@ namespace SimpleGallag.ViewModels
         {
             uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
         }
-    }
-
-    public enum TaskType
-    {
-        StartRockDrop,
-        CheckRockCrush,
-        CheckGameOver,
     }
 
     public enum SpeedType
@@ -181,8 +175,8 @@ namespace SimpleGallag.ViewModels
             get => isEasy;
             set
             {
-                Set(ref isEasy, value);
-                LevelType = LevelType.Easy;
+                if (Set(ref isEasy, value) && value)
+                    LevelType = LevelType.Easy;
             }
         }
 
@@ -192,8 +186,8 @@ namespace SimpleGallag.ViewModels
             get => isNormal;
             set
             {
-                Set(ref isNormal, value);
-                LevelType = LevelType.Normal;
+                if (Set(ref isNormal, value) && value)
+                    LevelType = LevelType.Normal;
             }
         }
 
@@ -203,8 +197,8 @@ namespace SimpleGallag.ViewModels
             get => isHard;
             set
             {
-                Set(ref isHard, value);
-                LevelType = LevelType.Hard;
+                if (Set(ref isHard, value) && value)
+                    LevelType = LevelType.Hard;
             }
         }
 
@@ -226,31 +220,33 @@ namespace SimpleGallag.ViewModels
         private ICommand startCommand;
         public ICommand StartCommand => startCommand ?? (startCommand = new RelayCommand(StartAction));
 
-        private void CheckGameOverTask(TaskType taskType, ObservableCollection<Rock> rocks)
+        Task checkTask;
+        private void CheckGameOverTask(ObservableCollection<Rock> rocks)
         {
-            Task.Factory.StartNew(() =>
-            {
-                while (IsGaming)
-                {
-                    TaskPause.Wait();
+            checkTask = Task.Factory.StartNew(() =>
+             {
+                 while (IsGaming)
+                 {
+                     TaskPause.Wait();
 
-                    lock (rocks)
-                    {
-                        foreach (var item in rocks)
-                        {
-                            if (item.Y + item.Height >= CanvasHeight)
-                            {
-                                IsGaming = false;
-                                IsGameOver = true;
-                            }
-                        }
-                    }
-                }
-                Thread.Sleep(100);
-            }, TaskCreationOptions.LongRunning);
+                     lock (rocks)
+                     {
+                         foreach (var item in rocks)
+                         {
+                             if (item.Y + item.Height >= CanvasHeight)
+                             {
+                                 IsGaming = false;
+                                 IsGameOver = true;
+                             }
+                         }
+                     }
+                     Thread.Sleep(100);
+                 }
+             }, TaskCreationOptions.LongRunning);
+
         }
 
-        private void CheckCrushTask(TaskType taskType, ObservableCollection<Rock> rocks)
+        private void CheckCrushTask(ObservableCollection<Rock> rocks)
         {
             Task.Factory.StartNew(() =>
             {
@@ -279,7 +275,7 @@ namespace SimpleGallag.ViewModels
             }, TaskCreationOptions.LongRunning);
         }
 
-        private void StartRockDropTask(TaskType taskType, ObservableCollection<Rock> rocks, SpeedType levelType)
+        private void StartRockDropTask(ObservableCollection<Rock> rocks, SpeedType levelType)
         {
             var xInterval = CanvasWidth / ColumnCount;
             var yInterval = CanvasHeight / (RowCount + 1);
@@ -409,9 +405,10 @@ namespace SimpleGallag.ViewModels
 
             Parallel.For(0, RockMap.Count, index =>
             {
-                StartRockDropTask(TaskType.StartRockDrop, RockMap[(SpeedType)index], (SpeedType)index);
-                CheckCrushTask(TaskType.CheckRockCrush, RockMap[(SpeedType)index]);
-                CheckGameOverTask(TaskType.CheckRockCrush, RockMap[(SpeedType)index]);
+                SimpleLogHandler.Instance.Add($"StartRockDropTask[{index}]");
+                StartRockDropTask(RockMap[(SpeedType)index], (SpeedType)index);
+                CheckCrushTask(RockMap[(SpeedType)index]);
+                CheckGameOverTask(RockMap[(SpeedType)index]);
             });
         }
 
@@ -434,7 +431,8 @@ namespace SimpleGallag.ViewModels
             IsGaming = false;
             Score = 0;
 
-            TaskPause.Reset();
+            TaskPause.Set();
+            checkTask.Wait();
 
             foreach (var rock in RockMap.Values)
                 rock.Clear();

@@ -112,7 +112,10 @@
     <Compile Include="Converters\BooleanToVisibilityInvertConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\IntToBrushConverter.cs" />
+    <Compile Include="Handlers\SimpleLogHandler.cs" />
+    <Compile Include="Handlers\TaskHandler.cs" />
     <Compile Include="Models\Laser.cs" />
+    <Compile Include="Models\LogType.cs" />
     <Compile Include="Models\Rock.cs" />
     <Compile Include="Models\Tank.cs" />
     <Compile Include="SystemConfig.cs" />
